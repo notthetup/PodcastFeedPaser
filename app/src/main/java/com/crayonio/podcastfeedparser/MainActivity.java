@@ -11,6 +11,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.os.Build;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 public class MainActivity extends Activity {
 
     @Override
@@ -23,6 +26,14 @@ public class MainActivity extends Activity {
                     .add(R.id.container, new PlaceholderFragment())
                     .commit();
         }
+
+        PodcastFeedParser parser = new PodcastFeedParser();
+        try {
+            parser.parseFeed(new URL("http://cyber.law.harvard.edu/rss/examples/rss2sample.xml"));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
     }
 
 
