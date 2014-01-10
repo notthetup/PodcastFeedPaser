@@ -11,8 +11,13 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
+ * Based of the original RSS 2.0 spec from http://cyber.law.harvard.edu/rss/
+ *
+ * http://cyber.law.harvard.edu/rss/examples/rss2sample.xml is an example feed which will be parsed.
+ *
  * Created by chinmay on 9/1/14.
  */
 public class RSSParserHandler extends DefaultHandler2 {
@@ -91,7 +96,7 @@ public class RSSParserHandler extends DefaultHandler2 {
     private String enclosureType;
 
 
-    private static final SimpleDateFormat rfcFormat = new SimpleDateFormat("yyyy-mm-DD'T'hh:mm:ssZ");
+    private static final SimpleDateFormat rfcFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz",  Locale.ENGLISH);
 
     public RSSParserHandler() {
         builder = new StringBuilder();
@@ -107,6 +112,7 @@ public class RSSParserHandler extends DefaultHandler2 {
     @Override
     public void endDocument() throws SAXException {
         doneParsing = true;
+        bless(parsedPodcast);
         super.endDocument();
     }
 
@@ -136,7 +142,7 @@ public class RSSParserHandler extends DefaultHandler2 {
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         super.endElement(uri, localName, qName);
-        String content = builder.toString();
+        String content = builder.toString().trim();
 
         if (localName.equalsIgnoreCase(ITEM)){
             currentChannel.addItem(currentItem);
@@ -326,5 +332,10 @@ public class RSSParserHandler extends DefaultHandler2 {
             Log.w(TAG,"Parsing not done");
 
         return parsedPodcast;
+    }
+
+
+    private void bless(ArrayList<Channel> parsedPodcast) {
+        /*Deals with various rules in the RSS spec, esp cross population.*/
     }
 }

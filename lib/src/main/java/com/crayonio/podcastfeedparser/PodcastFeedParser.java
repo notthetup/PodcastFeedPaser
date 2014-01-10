@@ -33,14 +33,11 @@ public class PodcastFeedParser {
         }
     }
 
-    public ArrayList<Channel> parseFeed(URL url){
+    public ArrayList<Channel> parseFeed(InputStream inputStream){
+        parserHandler = new RSSParserHandler();
+        xmlReader.setContentHandler(parserHandler);
 
         try {
-            InputStream inputStream = url.openStream();
-
-            parserHandler = new RSSParserHandler();
-            xmlReader.setContentHandler(parserHandler);
-
             xmlReader.parse(new InputSource(inputStream));
         } catch (IOException e) {
             e.printStackTrace();
