@@ -2,16 +2,22 @@ package com.crayonio.podcastfeedparser;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.graphics.Color;
+import android.net.http.HttpResponseCache;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import com.crayonio.podcastfeedparser.rss.Channel;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -34,26 +40,44 @@ public class MainActivity extends Activity {
         }
 
         try {
-            URL url = new URL("http://cyber.law.harvard.edu/rss/examples/rss2sample.xml");
-            fetchAndparseURL(url);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+            File httpCacheDir = new File(getApplicationContext().getCacheDir(), "http");
+            long httpCacheSize = 10 * 1024 * 1024; // 10 MiB
+            HttpResponseCache.install(httpCacheDir, httpCacheSize);
         }
+        catch (IOException e) {
+            Log.i(TAG, "HTTP response cache installation failed:" + e);
+        }
+
 
     }
 
     private void fetchAndparseURL(URL url) {
-        new AsyncTask<URL, Void, Void>(){
+        new AsyncTask<URL, Void, ArrayList<Channel>>(){
             @Override
-            protected Void doInBackground(URL... urls) {
+            protected ArrayList<Channel> doInBackground(URL... urls) {
+                ArrayList<Channel> podcastChannels = null;
                 try {
-                    ArrayList<Channel> podcastChannels = parser.parseFeed(urls[0].openStream());
+                    podcastChannels = parser.parseFeed(urls[0].openStream());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
-                return null;
+                return podcastChannels;
             }
+
+            @Override
+            protected void onPostExecute(ArrayList<Channel> channels) {
+                TextView result = (TextView) findViewById(R.id.testResult);
+                if(channels.size() > 0){
+                    result.setText(getString(R.string.passed));
+                    result.setTextColor(Color.GREEN);
+                }else{
+                    result.setText(getString(R.string.failed));
+                    result.setTextColor(Color.RED);
+                }
+            }
+
+
         }.execute(url);
     }
 
@@ -78,6 +102,17 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void buttonClicked(View view) {
+        EditText text = (EditText) findViewById(R.id.rssfield);
+
+        try {
+            URL url = new URL(text.getText().toString());
+            fetchAndparseURL(url);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * A placeholder fragment containing a simple view.
      */
@@ -88,7 +123,7 @@ public class MainActivity extends Activity {
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
+                                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             return rootView;
         }

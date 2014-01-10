@@ -118,8 +118,10 @@ public class RSSParserHandler extends DefaultHandler2 {
 
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+
         super.startElement(uri, localName, qName, attributes);
-        if (localName.equalsIgnoreCase(CHANNEL)){
+
+        if (qName.equalsIgnoreCase(CHANNEL)){
             this.currentChannel = new Channel();
         }else if (localName.equalsIgnoreCase(ITEM)){
             this.currentItem = new Item();
@@ -127,11 +129,11 @@ public class RSSParserHandler extends DefaultHandler2 {
             this.currentImage = new Image();
         }
 
-        if (localName.equalsIgnoreCase(CATEGORIES)){
+        if (qName.equalsIgnoreCase(CATEGORIES)){
             categoryDomain = attributes.getValue(DOMAIN);
         }
 
-        if (localName.equalsIgnoreCase(ENCLOSURE)){
+        if (qName.equalsIgnoreCase(ENCLOSURE)){
             enclosureURL = attributes.getValue(URL_TAG);
             enclosureLength = attributes.getValue(LENGTH);
             enclosureType = attributes.getValue(TYPE);
@@ -141,13 +143,15 @@ public class RSSParserHandler extends DefaultHandler2 {
 
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
+
         super.endElement(uri, localName, qName);
+
         String content = builder.toString().trim();
 
-        if (localName.equalsIgnoreCase(ITEM)){
+        if (qName.equalsIgnoreCase(ITEM)){
             currentChannel.addItem(currentItem);
             this.currentItem = null;
-        }else if (localName.equalsIgnoreCase(CHANNEL)){
+        }else if (qName.equalsIgnoreCase(CHANNEL)){
             parsedPodcast.add(currentChannel);
             this.currentChannel = null;
         }
@@ -156,23 +160,25 @@ public class RSSParserHandler extends DefaultHandler2 {
             /*For Channel Tags*/
 
             /*Parse Common tags first*/
-            if (localName.equalsIgnoreCase(TITLE)){
+            if (qName.equalsIgnoreCase(TITLE)){
                 currentChannel.setTitle(content);
-            } else if (localName.equalsIgnoreCase(LINK)){
+            } else if (qName.equalsIgnoreCase(LINK)){
                 try {
                     currentChannel.setLink(new URL(content));
                 } catch (MalformedURLException e) {
-                    e.printStackTrace();
+                    logParseError("URL", content, LINK);
+                    //e.printStackTrace();
                 }
-            } else if (localName.equalsIgnoreCase(DESCRIPTION)){
+            } else if (qName.equalsIgnoreCase(DESCRIPTION)){
                 currentChannel.setDescription(content);
-            } else if (localName.equalsIgnoreCase(PUB_DATE)){
+            } else if (qName.equalsIgnoreCase(PUB_DATE)){
                 try {
                     currentChannel.setPubDate(rfcFormat.parse(content));
                 } catch (ParseException e) {
-                    e.printStackTrace();
+                    logParseError("Date", content,PUB_DATE);
+                    //e.printStackTrace();
                 }
-            }else if (localName.equalsIgnoreCase(CATEGORIES)){
+            }else if (qName.equalsIgnoreCase(CATEGORIES)){
                 currentChannel.addCategory(new Category(categoryDomain,content));
                 categoryDomain = null;
             }
@@ -198,31 +204,33 @@ public class RSSParserHandler extends DefaultHandler2 {
                 public static final String IMAGE = "image";
              */
 
-            if (localName.equalsIgnoreCase(LANGUAGE)){
+            if (qName.equalsIgnoreCase(LANGUAGE)){
                 currentChannel.setLanguage(content);
-            } else if (localName.equalsIgnoreCase(COPYRIGHT)){
+            } else if (qName.equalsIgnoreCase(COPYRIGHT)){
                 currentChannel.setCopyright(content);
-            } else if (localName.equalsIgnoreCase(MANAGING_EDITOR)){
+            } else if (qName.equalsIgnoreCase(MANAGING_EDITOR)){
                 currentChannel.setManagingEditor(content);
-            } else if (localName.equalsIgnoreCase(WEBMASTER)){
+            } else if (qName.equalsIgnoreCase(WEBMASTER)){
                 currentChannel.setWebMaster(content);
-            } else if (localName.equalsIgnoreCase(LAST_BUILD_DATE)){
+            } else if (qName.equalsIgnoreCase(LAST_BUILD_DATE)){
                 try {
                     currentChannel.setLastBuildDate(rfcFormat.parse(content));
                 } catch (ParseException e) {
-                    e.printStackTrace();
+                    logParseError("Date", content,LAST_BUILD_DATE);
+                    //e.printStackTrace();
                 }
-            } else if (localName.equalsIgnoreCase(GENERATOR)){
+            } else if (qName.equalsIgnoreCase(GENERATOR)){
                 currentChannel.setGenerator(content);
-            } else if (localName.equalsIgnoreCase(DOCS)){
+            } else if (qName.equalsIgnoreCase(DOCS)){
                 try {
                     currentChannel.setDocs(new URL(content));
                 } catch (MalformedURLException e) {
-                    e.printStackTrace();
+                    logParseError("URL", content,DOCS);
+                    //e.printStackTrace();
                 }
-            } else if (localName.equalsIgnoreCase(TTL)){
+            } else if (qName.equalsIgnoreCase(TTL)){
                 currentChannel.setTTL(Integer.parseInt(content));
-            } else if (localName.equalsIgnoreCase(IMAGE)){
+            } else if (qName.equalsIgnoreCase(IMAGE)){
                 currentChannel.setImage(this.currentImage);
                 this.currentImage = null;
             }
@@ -230,23 +238,25 @@ public class RSSParserHandler extends DefaultHandler2 {
 
             /*For Sub tags of Image tag*/
             if (this.currentImage != null){
-                if (localName.equalsIgnoreCase(LINK)){
+                if (qName.equalsIgnoreCase(LINK)){
                     try {
                         currentImage.setLink(new URL(content));
                     } catch (MalformedURLException e) {
-                        e.printStackTrace();
+                        logParseError("URL", content,LINK);
+                        //e.printStackTrace();
                     }
-                } else if (localName.equalsIgnoreCase(URL_TAG)){
+                } else if (qName.equalsIgnoreCase(URL_TAG)){
                     try {
                         currentImage.setURL(new URL(content));
                     } catch (MalformedURLException e) {
-                        e.printStackTrace();
+                        logParseError("URL", content,URL_TAG);
+                        //e.printStackTrace();
                     }
-                } else if (localName.equalsIgnoreCase(TITLE)){
+                } else if (qName.equalsIgnoreCase(TITLE)){
                     currentImage.setTitle(content);
-                } else if (localName.equalsIgnoreCase(WIDTH)){
+                } else if (qName.equalsIgnoreCase(WIDTH)){
                     currentImage.setWidth(Integer.parseInt(content));
-                } else if (localName.equalsIgnoreCase(HEIGHT)){
+                } else if (qName.equalsIgnoreCase(HEIGHT)){
                     currentImage.setHeight(Integer.parseInt(content));
                 }
             }
@@ -257,23 +267,25 @@ public class RSSParserHandler extends DefaultHandler2 {
             /* For Item Tags*/
 
             /*Parse Common tags first*/
-            if (localName.equalsIgnoreCase(TITLE)){
+            if (qName.equalsIgnoreCase(TITLE)){
                 currentItem.setTitle(content);
-            } else if (localName.equalsIgnoreCase(LINK)){
+            } else if (qName.equalsIgnoreCase(LINK)){
                 try {
                     currentItem.setLink(new URL(content));
                 } catch (MalformedURLException e) {
-                    e.printStackTrace();
+                    logParseError("URL", content,LINK);
+                    //e.printStackTrace();
                 }
-            } else if (localName.equalsIgnoreCase(DESCRIPTION)){
+            } else if (qName.equalsIgnoreCase(DESCRIPTION)){
                 currentItem.setDescription(content);
-            } else if (localName.equalsIgnoreCase(PUB_DATE)){
+            } else if (qName.equalsIgnoreCase(PUB_DATE)){
                 try {
                     currentItem.setPubDate(rfcFormat.parse(content));
                 } catch (ParseException e) {
-                    e.printStackTrace();
+                    logParseError("Date", content,PUB_DATE);
+                    //e.printStackTrace();
                 }
-            }else if (localName.equalsIgnoreCase(CATEGORIES)){
+            }else if (qName.equalsIgnoreCase(CATEGORIES)){
                 currentItem.addCategory(new Category(categoryDomain,content));
                 categoryDomain = null;
             }
@@ -288,15 +300,15 @@ public class RSSParserHandler extends DefaultHandler2 {
                 public static final String GUID = "guid";
              */
 
-            if (localName.equalsIgnoreCase(AUTHOR)){
+            if (qName.equalsIgnoreCase(AUTHOR)){
                 currentItem.setAuthor(content);
-            } else if (localName.equalsIgnoreCase(COMMENTS)){
+            } else if (qName.equalsIgnoreCase(COMMENTS)){
                 try {
                     currentItem.setComments(new URL(content));
                 } catch (MalformedURLException e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
                 }
-            } else if (localName.equalsIgnoreCase(ENCLOSURE)){
+            } else if (qName.equalsIgnoreCase(ENCLOSURE)){
                 URL url = null;
                 int length = 0;
 
@@ -304,20 +316,40 @@ public class RSSParserHandler extends DefaultHandler2 {
                     try {
                         url = new URL(enclosureURL);
                     } catch (MalformedURLException e) {
-                        e.printStackTrace();
+                        logParseError("URL", content,ENCLOSURE);
+                        //e.printStackTrace();
                     }
                 }
 
-                if (enclosureLength != null)
-                    length = Integer.parseInt(enclosureLength);
+                if (enclosureLength != null){
+                    try{
+                        length = Integer.parseInt(enclosureLength);
+                    }catch (NumberFormatException e){
+                        logParseError("Number", content,ENCLOSURE);
+                        //e.printStackTrace();
+                    }
+                }
 
                 currentItem.setEnclosure(new Enclosure(url,length,enclosureType));
-            } else if (localName.equalsIgnoreCase(GUID)){
+
+                enclosureURL = null;
+                enclosureLength = null;
+                enclosureType = null;
+
+            } else if (qName.equalsIgnoreCase(GUID)){
                 currentItem.setGUID(content);
             }
         }
 
         builder.setLength(0);
+    }
+
+    private void logParseError(String type, String value, String tag) {
+
+        if (currentItem == null)
+            Log.d(TAG, "Unable to parse " + type + ": " + value + " inside the " + tag + " tag in channel " + currentChannel.getTitle());
+        else
+            Log.d(TAG, "Unable to parse " + type + ": " + value + " inside the " + tag + " tag in item " + currentItem.getTitle() + " in the channel " + currentChannel.getTitle());
     }
 
     @Override

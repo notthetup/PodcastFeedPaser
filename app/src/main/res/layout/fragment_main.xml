@@ -9,7 +9,47 @@
     tools:context="com.crayonio.podcastfeedparser.MainActivity$PlaceholderFragment">
 
     <TextView
-        android:text="@string/hello_world"
+        android:id="@+id/testString"
+        android:text="@string/test_rss_header"
+        android:layout_marginTop="20dp"
+        android:fontFamily="sans-serif-light"
+        android:textSize="45sp"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+
+    <EditText
+        android:id="@+id/rssfield"
+        android:text="@string/sample_rss"
+        android:layout_marginTop="60dp"
+        android:fontFamily="sans-serif-light"
+        android:textSize="20sp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/testString"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/testbutton"
+        android:text="Test"
+        android:fontFamily="sans-serif-light"
+        android:layout_marginTop="60dp"
+        android:layout_width="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/rssfield"
+        android:layout_height="wrap_content"
+        android:onClick="buttonClicked"/>
+
+
+    <TextView
+        android:id="@+id/testResult"
+        android:text=""
+        android:layout_marginTop="60dp"
+        android:fontFamily="sans-serif-light"
+        android:textSize="45sp"
+        android:layout_below="@+id/testbutton"
+        android:layout_centerHorizontal="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 

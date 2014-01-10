@@ -2,7 +2,11 @@
 <resources>
 
     <string name="app_name">PodcastFeedPaser</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="test_rss_header">Test RSS!</string>
+    <string name="sample_rss">http://build-podcast.com/feed</string>
     <string name="action_settings">Settings</string>
+
+    <string name="passed">Passed!</string>
+    <string name="failed">Failed!</string>
 
 </resources>
